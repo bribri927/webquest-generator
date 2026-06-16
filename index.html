@@ -667,17 +667,17 @@ async function generateWebQuest() {
   document.getElementById('wq-guiding-q').textContent = 'Crafting your guiding question...';
   window.scrollTo({ top: 0, behavior: 'smooth' });
 
-  const prompt = `Create a ${selectedType}-term WebQuest for ${gradeLabel} ${currentSubject} on "${selectedTopic}". Use ${tech}, involve ${grouping}, align to California standards. Students must CREATE, not just consume. Return ONLY raw JSON, no markdown:
+  const prompt = `IMPORTANT: Respond with ONLY a raw JSON object. No markdown. No code fences. No backticks. No explanation. Start your response with { and end with }. Create a ${selectedType}-term WebQuest for ${gradeLabel} ${currentSubject} on "${selectedTopic}". Use ${tech}, involve ${grouping}, align to California standards. Students must CREATE, not just consume. Return ONLY raw JSON:
 {"title":"engaging title","subtitle":"${gradeLabel} | ${currentSubject}","guidingQuestion":"open-ended driving question","introduction":{"roleSetup":"student role in 1 sentence","scenario":"2 short paragraphs: vivid hook + challenge statement"},"task":{"overview":"what students make in 2 sentences","roles":[{"icon":"emoji","name":"Role","description":"brief duty"},{"icon":"emoji","name":"Role","description":"brief duty"},{"icon":"emoji","name":"Role","description":"brief duty"},{"icon":"emoji","name":"Role","description":"brief duty"}],"finalProduct":"specific deliverable using ${tech}"},"process":{"intro":"1 sentence","steps":[{"title":"Explore","description":"Students investigate the topic"},{"title":"Research","description":"Students use provided resources"},{"title":"Analyze","description":"Students synthesize findings"},{"title":"Create","description":"Students build product using ${tech}"},{"title":"Share","description":"Groups present and reflect"}]},"resources":[{"icon":"🌐","name":"Resource 1","url":"https://example.org","description":"what to find here"},{"icon":"📊","name":"Resource 2","url":"https://example.org","description":"what to find here"},{"icon":"🎥","name":"Resource 3","url":"https://example.org","description":"what to find here"},{"icon":"📰","name":"Resource 4","url":"https://example.org","description":"what to find here"}],"evaluation":{"intro":"1 sentence","criteria":[{"category":"Content","score4":"Exceeds","score3":"Meets","score2":"Approaching","score1":"Beginning"},{"category":"Critical Thinking","score4":"Exceeds","score3":"Meets","score2":"Approaching","score1":"Beginning"},{"category":"Creation","score4":"Exceeds","score3":"Meets","score2":"Approaching","score1":"Beginning"},{"category":"Collaboration","score4":"Exceeds","score3":"Meets","score2":"Approaching","score1":"Beginning"}]},"conclusion":{"reflection":"2 sentences prompting reflection","extensions":["idea 1","idea 2","idea 3"],"realWorldConnection":"1 sentence career/civic link"},"creationOptions":[{"icon":"🎨","name":"Option 1","description":"using ${tech}"},{"icon":"📝","name":"Option 2","description":"brief"},{"icon":"🎙","name":"Option 3","description":"brief"}]}`;
 
   try {
     const res = await fetch('/api/claude-proxy', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ model: 'claude-haiku-4-5', max_tokens: 1500, messages: [{ role: 'user', content: prompt }] })
+      body: JSON.stringify({ model: 'claude-haiku-4-5', max_tokens: 3000, messages: [{ role: 'user', content: prompt }] })
     });
     const data = await res.json();
-    const raw = data.content[0].text.trim().replace(/```json|```/g,'').trim();
+    const raw = data.content[0].text.trim().replace(/^```json\s*/,'').replace(/^```\s*/,'').replace(/```\s*$/,'').trim();
     currentWQ = JSON.parse(raw);
     renderWebQuest(currentWQ, gradeLabel);
   } catch(e) {
