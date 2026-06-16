@@ -5,9 +5,6 @@ exports.handler = async function (event) {
 
   try {
     const body = JSON.parse(event.body);
-    
-    // Force faster model settings
-    body.max_tokens = Math.min(body.max_tokens || 1500, 1500);
 
     const response = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
@@ -20,6 +17,20 @@ exports.handler = async function (event) {
     });
 
     const data = await response.json();
+
+    // Clean the response text if it exists
+    if (data.content && data.content[0] && data.content[0].text) {
+      let text = data.content[0].text.trim();
+      // Strip markdown code fences
+      text = text.replace(/^```json\s*/i, '').replace(/^```\s*/, '').replace(/```\s*$/, '').trim();
+      // Find the JSON object boundaries
+      const start = text.indexOf('{');
+      const end = text.lastIndexOf('}');
+      if (start !== -1 && end !== -1) {
+        text = text.substring(start, end + 1);
+      }
+      data.content[0].text = text;
+    }
 
     return {
       statusCode: response.status,
@@ -35,8 +46,4 @@ exports.handler = async function (event) {
       body: JSON.stringify({ error: "Proxy error", detail: err.message }),
     };
   }
-};
-
-exports.config = {
-  timeout: 26,
 };
