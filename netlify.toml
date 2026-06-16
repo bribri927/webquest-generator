@@ -1,9 +1,6 @@
 [build]
   functions = "netlify/functions"
 
-[functions."claude-proxy"]
-  timeout = 26
-
 [[redirects]]
   from = "/api/*"
   to = "/.netlify/functions/:splat"
