@@ -4,6 +4,11 @@ exports.handler = async function (event) {
   }
 
   try {
+    const body = JSON.parse(event.body);
+    
+    // Force faster model settings
+    body.max_tokens = Math.min(body.max_tokens || 1500, 1500);
+
     const response = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
       headers: {
@@ -11,7 +16,7 @@ exports.handler = async function (event) {
         "x-api-key": process.env.ANTHROPIC_API_KEY,
         "anthropic-version": "2023-06-01",
       },
-      body: event.body,
+      body: JSON.stringify(body),
     });
 
     const data = await response.json();
@@ -30,4 +35,8 @@ exports.handler = async function (event) {
       body: JSON.stringify({ error: "Proxy error", detail: err.message }),
     };
   }
+};
+
+exports.config = {
+  timeout: 26,
 };
