@@ -1,0 +1,1006 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WebQuest Generator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fraunces:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --hive-amber: #F59E0B;
+    --hive-amber-light: #FEF3C7;
+    --hive-amber-dark: #92400E;
+    --hive-teal: #0D9488;
+    --hive-teal-light: #CCFBF1;
+    --hive-teal-dark: #134E4A;
+    --hive-purple: #7C3AED;
+    --hive-purple-light: #EDE9FE;
+    --hive-coral: #F97316;
+    --hive-coral-light: #FFF7ED;
+    --ink: #1C1917;
+    --ink-muted: #57534E;
+    --ink-faint: #A8A29E;
+    --surface: #FAFAF9;
+    --surface-2: #F5F5F4;
+    --border: #E7E5E4;
+    --border-strong: #D6D3D1;
+    --white: #FFFFFF;
+    --radius-sm: 6px;
+    --radius-md: 10px;
+    --radius-lg: 16px;
+    --radius-xl: 24px;
+  }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--surface);
+    color: var(--ink);
+    min-height: 100vh;
+    line-height: 1.6;
+  }
+
+
+
+  .hero {
+    background: linear-gradient(135deg, #FEFCE8 0%, #ECFDF5 50%, #EDE9FE 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 3rem 2rem 2.5rem;
+    text-align: center;
+  }
+  .hero-eyebrow { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; color: var(--hive-amber-dark); background: var(--hive-amber-light); padding: 4px 12px; border-radius: 20px; margin-bottom: 1rem; letter-spacing: 0.06em; text-transform: uppercase; }
+  .hero h1 { font-family: 'Fraunces', serif; font-size: clamp(28px, 5vw, 48px); font-weight: 600; line-height: 1.15; letter-spacing: -0.03em; color: var(--ink); margin-bottom: 0.75rem; }
+  .hero h1 em { font-style: italic; color: var(--hive-teal); }
+  .hero p { font-size: 17px; color: var(--ink-muted); max-width: 520px; margin: 0 auto; line-height: 1.65; }
+
+  .app-container { max-width: 900px; margin: 0 auto; padding: 2.5rem 1.5rem 4rem; }
+
+  .step-card { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius-xl); padding: 2rem 2.5rem; margin-bottom: 1.5rem; }
+  .step-label { display: flex; align-items: center; gap: 10px; margin-bottom: 1.25rem; }
+  .step-num { width: 28px; height: 28px; border-radius: 50%; background: var(--hive-amber); color: var(--white); font-size: 13px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .step-title { font-size: 16px; font-weight: 600; color: var(--ink); }
+  .step-sub { font-size: 13px; color: var(--ink-muted); margin-top: 1px; }
+
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.25rem; }
+  @media (max-width: 600px) { .form-row { grid-template-columns: 1fr; } }
+  .form-group { display: flex; flex-direction: column; gap: 6px; }
+  .form-group label { font-size: 13px; font-weight: 500; color: var(--ink); }
+  .form-group select, .form-group input {
+    padding: 10px 14px;
+    border: 1.5px solid var(--border-strong);
+    border-radius: var(--radius-md);
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    color: var(--ink);
+    background: var(--white);
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M2 4l4 4 4-4' stroke='%2357534E' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 36px;
+    transition: border-color 0.15s;
+    cursor: pointer;
+  }
+  .form-group input { background-image: none; padding-right: 14px; cursor: text; }
+  .form-group select:focus, .form-group input:focus { outline: none; border-color: var(--hive-teal); box-shadow: 0 0 0 3px rgba(13,148,136,0.12); }
+
+  .topic-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 0.75rem; min-height: 48px; }
+  .topic-pill { padding: 8px 16px; border: 1.5px solid var(--border-strong); border-radius: 30px; font-size: 13px; font-weight: 500; color: var(--ink-muted); background: var(--white); cursor: pointer; transition: all 0.15s; user-select: none; }
+  .topic-pill:hover { border-color: var(--hive-teal); color: var(--hive-teal-dark); background: var(--hive-teal-light); }
+  .topic-pill.selected { border-color: var(--hive-teal); background: var(--hive-teal); color: var(--white); font-weight: 600; }
+  .topic-pill.selected:hover { background: var(--hive-teal-dark); border-color: var(--hive-teal-dark); }
+  .topics-loading { font-size: 13px; color: var(--ink-faint); font-style: italic; padding: 8px 0; }
+
+  .options-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; margin-bottom: 1.25rem; }
+  @media (max-width: 600px) { .options-row { grid-template-columns: 1fr; } }
+
+  .generate-btn { width: 100%; padding: 14px 24px; background: var(--hive-amber); color: var(--white); border: none; border-radius: var(--radius-lg); font-family: 'Inter', sans-serif; font-size: 16px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.15s; letter-spacing: -0.01em; }
+  .generate-btn:hover { background: #D97706; transform: translateY(-1px); }
+  .generate-btn:active { transform: translateY(0); }
+  .generate-btn:disabled { background: var(--ink-faint); cursor: not-allowed; transform: none; }
+  .generate-btn svg { width: 20px; height: 20px; }
+
+  #webquest-output { display: none; }
+
+  .wq-header { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius-xl); overflow: hidden; margin-bottom: 1.5rem; }
+  .wq-banner { background: linear-gradient(135deg, var(--hive-teal) 0%, #0F766E 100%); padding: 2.5rem 2.5rem 2rem; color: var(--white); }
+  .wq-banner .wq-tag { display: inline-block; background: rgba(255,255,255,0.2); color: var(--white); font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 20px; letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 1rem; }
+  .wq-banner h2 { font-family: 'Fraunces', serif; font-size: clamp(22px, 4vw, 34px); font-weight: 600; line-height: 1.2; margin-bottom: 0.5rem; letter-spacing: -0.02em; }
+  .wq-banner .wq-meta { font-size: 14px; opacity: 0.85; }
+  .wq-guiding-q { padding: 1.5rem 2.5rem; border-top: 1px solid var(--border); background: var(--surface); display: flex; align-items: flex-start; gap: 12px; }
+  .wq-guiding-q .q-icon { width: 36px; height: 36px; border-radius: 50%; background: var(--hive-amber-light); display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 18px; margin-top: 2px; }
+  .wq-guiding-q p { font-size: 16px; font-weight: 500; color: var(--ink); line-height: 1.5; font-style: italic; }
+  .wq-guiding-q .q-label { font-size: 11px; font-weight: 600; color: var(--ink-faint); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 4px; font-style: normal; }
+
+  .wq-sections { display: flex; flex-direction: column; gap: 1rem; }
+  .wq-section { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius-xl); overflow: hidden; }
+  .wq-section-header { padding: 1.25rem 2rem; display: flex; align-items: center; gap: 14px; border-bottom: 1px solid var(--border); cursor: pointer; user-select: none; }
+  .wq-section-header:hover { background: var(--surface); }
+  .section-icon { width: 40px; height: 40px; border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
+  .section-icon.intro { background: #FEF3C7; }
+  .section-icon.task { background: #EDE9FE; }
+  .section-icon.process { background: #ECFDF5; }
+  .section-icon.resources { background: #EFF6FF; }
+  .section-icon.evaluation { background: #FFF7ED; }
+  .section-icon.conclusion { background: #FCE7F3; }
+  .section-header-text { flex: 1; }
+  .section-header-text h3 { font-size: 16px; font-weight: 600; color: var(--ink); margin-bottom: 1px; }
+  .section-header-text p { font-size: 12px; color: var(--ink-faint); }
+  .toggle-arrow { color: var(--ink-faint); transition: transform 0.2s; font-size: 20px; }
+  .toggle-arrow.open { transform: rotate(180deg); }
+  .wq-section-body { padding: 1.75rem 2rem; display: none; }
+  .wq-section-body.open { display: block; }
+  .wq-section-body p, .wq-section-body li { font-size: 15px; line-height: 1.75; color: var(--ink); margin-bottom: 0.75rem; }
+  .wq-section-body h4 { font-size: 12px; font-weight: 600; color: var(--ink-muted); margin: 1.25rem 0 0.5rem; text-transform: uppercase; letter-spacing: 0.05em; }
+  .wq-section-body ul, .wq-section-body ol { padding-left: 1.5rem; margin-bottom: 0.75rem; }
+
+  .role-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin: 1rem 0; }
+  .role-card { border: 1.5px solid var(--border); border-radius: var(--radius-md); padding: 1rem; }
+  .role-card .role-icon { font-size: 24px; margin-bottom: 6px; }
+  .role-card .role-name { font-size: 13px; font-weight: 600; color: var(--ink); margin-bottom: 4px; }
+  .role-card .role-desc { font-size: 12px; color: var(--ink-muted); line-height: 1.5; }
+
+  .process-steps { display: flex; flex-direction: column; gap: 12px; margin: 0.75rem 0; }
+  .process-step { display: flex; gap: 14px; align-items: flex-start; }
+  .process-step-num { width: 28px; height: 28px; border-radius: 50%; background: var(--hive-teal-light); color: var(--hive-teal-dark); font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px; }
+  .process-step-content { flex: 1; }
+  .process-step-content strong { font-size: 14px; font-weight: 600; display: block; margin-bottom: 2px; }
+  .process-step-content p { font-size: 14px; color: var(--ink-muted); margin: 0; }
+
+  .resource-item { display: flex; align-items: flex-start; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--border); }
+  .resource-item:last-child { border-bottom: none; }
+  .resource-icon { width: 36px; height: 36px; border-radius: var(--radius-sm); background: var(--surface-2); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
+  .resource-content { flex: 1; }
+  .resource-content strong { font-size: 14px; font-weight: 600; display: block; }
+  .resource-content p { font-size: 13px; color: var(--ink-muted); margin: 2px 0 0; }
+
+  .rubric-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 0.75rem; }
+  .rubric-table th { background: var(--surface-2); padding: 10px 14px; text-align: left; font-weight: 600; font-size: 12px; color: var(--ink-muted); text-transform: uppercase; letter-spacing: 0.04em; border: 1px solid var(--border); }
+  .rubric-table td { padding: 10px 14px; border: 1px solid var(--border); vertical-align: top; line-height: 1.5; color: var(--ink); }
+  .rubric-table tr:nth-child(even) td { background: var(--surface); }
+  .score-badge { display: inline-block; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 20px; margin-bottom: 4px; }
+  .score-4 { background: #DCFCE7; color: #166534; }
+  .score-3 { background: #DBEAFE; color: #1E40AF; }
+  .score-2 { background: #FEF3C7; color: #92400E; }
+  .score-1 { background: #FFE4E6; color: #9F1239; }
+
+  .create-challenge { background: linear-gradient(135deg, var(--hive-purple-light) 0%, #FEF3C7 100%); border: 1.5px solid #DDD6FE; border-radius: var(--radius-xl); padding: 2rem 2.5rem; margin-top: 1.5rem; }
+  .create-challenge h3 { font-family: 'Fraunces', serif; font-size: 20px; font-weight: 600; margin-bottom: 0.5rem; color: var(--hive-purple); letter-spacing: -0.02em; }
+  .create-challenge p { font-size: 14px; color: var(--ink-muted); margin-bottom: 1.25rem; }
+  .deliverable-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 10px; }
+  .deliverable-card { background: var(--white); border: 1px solid #DDD6FE; border-radius: var(--radius-md); padding: 12px 14px; font-size: 13px; }
+  .deliverable-card .d-icon { font-size: 22px; margin-bottom: 6px; display: block; }
+  .deliverable-card strong { font-weight: 600; color: var(--ink); display: block; margin-bottom: 2px; }
+  .deliverable-card span { color: var(--ink-muted); font-size: 12px; line-height: 1.4; display: block; }
+
+  /* ---- EXPORT TOOLBAR ---- */
+  .export-section { margin-top: 2rem; }
+  .export-section-label { font-size: 12px; font-weight: 600; color: var(--ink-faint); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 0.75rem; }
+  .export-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 1rem; }
+  @media (max-width: 650px) { .export-grid { grid-template-columns: 1fr; } }
+
+  .export-card {
+    background: var(--white);
+    border: 1.5px solid var(--border-strong);
+    border-radius: var(--radius-lg);
+    padding: 1.25rem;
+    cursor: pointer;
+    transition: all 0.15s;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    text-align: left;
+  }
+  .export-card:hover { transform: translateY(-2px); }
+  .export-card.pdf-card:hover { border-color: #DC2626; background: #FFF1F2; }
+  .export-card.canvas-card:hover { border-color: #E63C2E; background: #FFF5F4; }
+  .export-card.gc-card:hover { border-color: #1967D2; background: #EEF4FF; }
+
+  .export-card-icon { font-size: 28px; line-height: 1; }
+  .export-card-title { font-size: 14px; font-weight: 700; color: var(--ink); }
+  .export-card-desc { font-size: 12px; color: var(--ink-muted); line-height: 1.4; }
+  .export-card-badge { display: inline-block; font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 10px; letter-spacing: 0.04em; }
+  .badge-pdf { background: #FEE2E2; color: #991B1B; }
+  .badge-canvas { background: #FFE4E0; color: #9B1C1C; }
+  .badge-gc { background: #DBEAFE; color: #1E3A8A; }
+
+  .utility-row { display: flex; gap: 10px; flex-wrap: wrap; }
+  .toolbar-btn { padding: 10px 18px; border: 1.5px solid var(--border-strong); border-radius: var(--radius-md); background: var(--white); font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 600; color: var(--ink); cursor: pointer; display: flex; align-items: center; gap: 6px; transition: all 0.15s; }
+  .toolbar-btn:hover { border-color: var(--hive-teal); color: var(--hive-teal-dark); background: var(--hive-teal-light); }
+  .toolbar-btn svg { width: 16px; height: 16px; }
+
+  .loading-state { text-align: center; padding: 3rem 2rem; }
+  .spinner { width: 40px; height: 40px; border: 3px solid var(--border); border-top-color: var(--hive-teal); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 1rem; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loading-state p { font-size: 15px; color: var(--ink-muted); }
+  .loading-state .loading-tip { font-size: 13px; color: var(--ink-faint); margin-top: 0.5rem; font-style: italic; }
+
+  .error-state { background: #FFF1F2; border: 1px solid #FFE4E6; border-radius: var(--radius-lg); padding: 1.5rem; text-align: center; color: #9F1239; font-size: 14px; }
+
+  .reset-link { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 500; color: var(--ink-muted); cursor: pointer; text-decoration: none; margin-bottom: 1.5rem; transition: color 0.15s; }
+  .reset-link:hover { color: var(--hive-teal); }
+
+  .wq-type-toggle { display: flex; gap: 8px; margin-top: 6px; }
+  .type-btn { flex: 1; padding: 9px 12px; border: 1.5px solid var(--border-strong); border-radius: var(--radius-md); background: var(--white); font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 500; color: var(--ink-muted); cursor: pointer; text-align: center; transition: all 0.15s; }
+  .type-btn:hover { border-color: var(--hive-teal); color: var(--hive-teal-dark); }
+  .type-btn.active { border-color: var(--hive-teal); background: var(--hive-teal-light); color: var(--hive-teal-dark); font-weight: 600; }
+
+  /* ---- MODAL OVERLAY ---- */
+  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1000; display: none; align-items: center; justify-content: center; padding: 1rem; }
+  .modal-overlay.open { display: flex; }
+  .modal-box { background: var(--white); border-radius: var(--radius-xl); max-width: 640px; width: 100%; max-height: 80vh; overflow-y: auto; padding: 2rem; position: relative; }
+  .modal-close { position: absolute; top: 1rem; right: 1rem; background: var(--surface-2); border: none; border-radius: 50%; width: 32px; height: 32px; cursor: pointer; font-size: 18px; display: flex; align-items: center; justify-content: center; color: var(--ink-muted); transition: background 0.15s; }
+  .modal-close:hover { background: var(--border); }
+  .modal-title { font-size: 18px; font-weight: 700; color: var(--ink); margin-bottom: 0.25rem; }
+  .modal-subtitle { font-size: 13px; color: var(--ink-muted); margin-bottom: 1.5rem; }
+  .modal-section { margin-bottom: 1.25rem; }
+  .modal-section-label { font-size: 11px; font-weight: 600; color: var(--ink-faint); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 0.5rem; }
+  .copy-block { background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 1rem; font-size: 13px; font-family: monospace; color: var(--ink); white-space: pre-wrap; word-break: break-all; max-height: 200px; overflow-y: auto; }
+  .modal-btn { padding: 10px 20px; border-radius: var(--radius-md); font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 600; cursor: pointer; border: none; transition: all 0.15s; display: inline-flex; align-items: center; gap: 8px; }
+  .modal-btn.primary { background: var(--hive-teal); color: var(--white); }
+  .modal-btn.primary:hover { background: var(--hive-teal-dark); }
+  .modal-btn.secondary { background: var(--surface-2); color: var(--ink); border: 1.5px solid var(--border-strong); }
+  .modal-btn.secondary:hover { border-color: var(--hive-teal); color: var(--hive-teal-dark); }
+  .modal-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 1rem; }
+
+  .step-row { display: flex; gap: 12px; align-items: flex-start; margin-bottom: 1rem; }
+  .step-bubble { width: 24px; height: 24px; border-radius: 50%; background: var(--hive-teal-light); color: var(--hive-teal-dark); font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
+  .step-row p { font-size: 14px; color: var(--ink); line-height: 1.5; margin: 0; }
+
+  /* ---- PRINT STYLES ---- */
+  @media print {
+    .hero, #setup-section, .export-section, .reset-link,
+    .wq-section-header .toggle-arrow, .modal-overlay { display: none !important; }
+    body { background: white; font-size: 12pt; }
+    .app-container { padding: 0; max-width: 100%; }
+    .wq-section-body { display: block !important; padding: 1rem 1.5rem; }
+    .wq-section { border: 1px solid #ccc; border-radius: 8px; margin-bottom: 12pt; break-inside: avoid; }
+    .wq-section-header { border-radius: 8px 8px 0 0; }
+    .wq-banner { background: #0D9488 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .rubric-table { font-size: 10pt; }
+    .role-cards { grid-template-columns: repeat(2, 1fr); }
+    .create-challenge { break-inside: avoid; }
+    .wq-header { break-inside: avoid; }
+    h2, h3 { break-after: avoid; }
+    @page { margin: 0.75in; }
+  }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="hero-eyebrow">✦ AI-Powered Inquiry Learning</div>
+  <h1>Build an <em>engaging</em> WebQuest<br>in under two minutes</h1>
+  <p>Select your grade level, subject, and a standards-aligned topic. Get a complete inquiry-based WebQuest your students will actually love.</p>
+</div>
+
+<div class="app-container">
+
+  <div id="setup-section">
+    <div class="step-card">
+      <div class="step-label">
+        <div class="step-num">1</div>
+        <div>
+          <div class="step-title">Tell us about your class</div>
+          <div class="step-sub">Grade level and subject area</div>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="grade-select">Grade level</label>
+          <select id="grade-select">
+            <option value="">Select a grade...</option>
+            <option value="K">Kindergarten</option>
+            <option value="1">Grade 1</option>
+            <option value="2">Grade 2</option>
+            <option value="3">Grade 3</option>
+            <option value="4">Grade 4</option>
+            <option value="5">Grade 5</option>
+            <option value="6">Grade 6</option>
+            <option value="7">Grade 7</option>
+            <option value="8">Grade 8</option>
+            <option value="9">Grade 9</option>
+            <option value="10">Grade 10</option>
+            <option value="11">Grade 11</option>
+            <option value="12">Grade 12</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="subject-select">Subject area</label>
+          <select id="subject-select">
+            <option value="">Select a subject...</option>
+            <option value="ELA">English Language Arts</option>
+            <option value="Math">Mathematics</option>
+            <option value="Science">Science (NGSS)</option>
+            <option value="Social Studies">Social Studies / History</option>
+            <option value="Computer Science">Computer Science</option>
+            <option value="Visual Arts">Visual Arts</option>
+            <option value="Music">Music</option>
+            <option value="PE">Physical Education</option>
+            <option value="Health">Health</option>
+            <option value="World Language">World Language</option>
+          </select>
+        </div>
+      </div>
+      <button class="generate-btn" onclick="loadTopics()" style="background: var(--hive-teal); max-width: 280px;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+        Load standards-aligned topics
+      </button>
+    </div>
+
+    <div class="step-card" id="topic-card" style="display:none;">
+      <div class="step-label">
+        <div class="step-num">2</div>
+        <div>
+          <div class="step-title">Choose a topic</div>
+          <div class="step-sub">Based on California Content Standards for your grade and subject</div>
+        </div>
+      </div>
+      <div class="topic-grid" id="topic-grid">
+        <div class="topics-loading">Loading topics from California Content Standards...</div>
+      </div>
+    </div>
+
+    <div class="step-card" id="options-card" style="display:none;">
+      <div class="step-label">
+        <div class="step-num">3</div>
+        <div>
+          <div class="step-title">Customize your WebQuest</div>
+          <div class="step-sub">Fine-tune to fit your classroom</div>
+        </div>
+      </div>
+      <div class="options-row">
+        <div class="form-group">
+          <label for="duration-select">Duration</label>
+          <select id="duration-select">
+            <option value="short">Short-term (1–3 days)</option>
+            <option value="long">Long-term (1–2 weeks)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="grouping-select">Student grouping</label>
+          <select id="grouping-select">
+            <option value="small groups">Small groups (3–4)</option>
+            <option value="pairs">Pairs</option>
+            <option value="individual">Individual</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="tech-select">Primary creation tool</label>
+          <select id="tech-select">
+            <option value="Google Slides or Canva">Slideshow (Slides/Canva)</option>
+            <option value="a short video or screencast">Video / Screencast</option>
+            <option value="a podcast episode or audio recording">Podcast / Audio</option>
+            <option value="a website or digital poster">Website / Digital poster</option>
+            <option value="a written digital document or blog post">Written doc / Blog</option>
+            <option value="a choice board — students pick their format">Student choice board</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group" style="margin-bottom: 1.25rem;">
+        <label>WebQuest type</label>
+        <div class="wq-type-toggle">
+          <button class="type-btn active" id="type-short" onclick="setType('short')">⚡ Short-term<br><span style="font-weight:400;font-size:11px;">1–3 class periods</span></button>
+          <button class="type-btn" id="type-long" onclick="setType('long')">🗓 Long-term<br><span style="font-weight:400;font-size:11px;">1–2 weeks</span></button>
+        </div>
+      </div>
+      <button class="generate-btn" id="generate-btn" onclick="generateWebQuest()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+        Generate my WebQuest
+      </button>
+    </div>
+  </div>
+
+  <!-- OUTPUT -->
+  <div id="webquest-output">
+    <a class="reset-link" onclick="resetForm()">← Build a new WebQuest</a>
+
+    <div class="wq-header">
+      <div class="wq-banner">
+        <div class="wq-tag">🔍 WebQuest</div>
+        <h2 id="wq-title">Loading...</h2>
+        <div class="wq-meta" id="wq-meta"></div>
+      </div>
+      <div class="wq-guiding-q">
+        <div class="q-icon">❓</div>
+        <div>
+          <div class="q-label">Guiding Question</div>
+          <p id="wq-guiding-q">Crafting your guiding question...</p>
+        </div>
+      </div>
+    </div>
+
+    <div id="output-loading" class="loading-state">
+      <div class="spinner"></div>
+      <p>Crafting your WebQuest...</p>
+      <p class="loading-tip">Designing real-world tasks and curating resources aligned to California standards</p>
+    </div>
+
+    <div class="wq-sections" id="wq-sections" style="display:none;">
+      <div class="wq-section">
+        <div class="wq-section-header" onclick="toggleSection('intro')">
+          <div class="section-icon intro">🎬</div>
+          <div class="section-header-text"><h3>Introduction</h3><p>Hook students into the scenario</p></div>
+          <span class="toggle-arrow open" id="arrow-intro">▾</span>
+        </div>
+        <div class="wq-section-body open" id="body-intro"><div id="content-intro"></div></div>
+      </div>
+      <div class="wq-section">
+        <div class="wq-section-header" onclick="toggleSection('task')">
+          <div class="section-icon task">🎯</div>
+          <div class="section-header-text"><h3>Task</h3><p>What students will create and produce</p></div>
+          <span class="toggle-arrow" id="arrow-task">▾</span>
+        </div>
+        <div class="wq-section-body" id="body-task"><div id="content-task"></div></div>
+      </div>
+      <div class="wq-section">
+        <div class="wq-section-header" onclick="toggleSection('process')">
+          <div class="section-icon process">🗺</div>
+          <div class="section-header-text"><h3>Process</h3><p>Step-by-step research and creation guide</p></div>
+          <span class="toggle-arrow" id="arrow-process">▾</span>
+        </div>
+        <div class="wq-section-body" id="body-process"><div id="content-process"></div></div>
+      </div>
+      <div class="wq-section">
+        <div class="wq-section-header" onclick="toggleSection('resources')">
+          <div class="section-icon resources">🔗</div>
+          <div class="section-header-text"><h3>Resources</h3><p>Curated, vetted links and tools</p></div>
+          <span class="toggle-arrow" id="arrow-resources">▾</span>
+        </div>
+        <div class="wq-section-body" id="body-resources"><div id="content-resources"></div></div>
+      </div>
+      <div class="wq-section">
+        <div class="wq-section-header" onclick="toggleSection('evaluation')">
+          <div class="section-icon evaluation">📊</div>
+          <div class="section-header-text"><h3>Evaluation</h3><p>Rubric and assessment criteria</p></div>
+          <span class="toggle-arrow" id="arrow-evaluation">▾</span>
+        </div>
+        <div class="wq-section-body" id="body-evaluation"><div id="content-evaluation"></div></div>
+      </div>
+      <div class="wq-section">
+        <div class="wq-section-header" onclick="toggleSection('conclusion')">
+          <div class="section-icon conclusion">🌟</div>
+          <div class="section-header-text"><h3>Conclusion</h3><p>Reflection and extension ideas</p></div>
+          <span class="toggle-arrow" id="arrow-conclusion">▾</span>
+        </div>
+        <div class="wq-section-body" id="body-conclusion"><div id="content-conclusion"></div></div>
+      </div>
+    </div>
+
+    <div class="create-challenge" id="create-challenge" style="display:none;">
+      <h3>🚀 The Creation Challenge</h3>
+      <p>Students don't just find information — they make something with it. Here are the deliverable options for this WebQuest:</p>
+      <div class="deliverable-cards" id="deliverable-cards"></div>
+    </div>
+
+    <!-- EXPORT SECTION -->
+    <div class="export-section" id="export-section" style="display:none;">
+      <div class="export-section-label">Export & share this WebQuest</div>
+      <div class="export-grid">
+
+        <div class="export-card pdf-card" onclick="exportPDF()">
+          <div class="export-card-icon">📄</div>
+          <div class="export-card-title">Download PDF</div>
+          <div class="export-card-desc">Print-ready layout — hand it out or save for your files</div>
+          <span class="export-card-badge badge-pdf">PDF</span>
+        </div>
+
+        <div class="export-card canvas-card" onclick="openModal('canvas')">
+          <div class="export-card-icon">🎨</div>
+          <div class="export-card-title">Canvas LMS</div>
+          <div class="export-card-desc">Formatted HTML ready to paste into a Canvas page or module</div>
+          <span class="export-card-badge badge-canvas">Canvas</span>
+        </div>
+
+        <div class="export-card gc-card" onclick="openModal('gc')">
+          <div class="export-card-icon">🏫</div>
+          <div class="export-card-title">Google Classroom</div>
+          <div class="export-card-desc">Formatted text and instructions for a Classroom assignment</div>
+          <span class="export-card-badge badge-gc">Google Classroom</span>
+        </div>
+
+      </div>
+
+      <div class="utility-row">
+        <button class="toolbar-btn" onclick="generateWebQuest()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.51"/></svg>
+          Regenerate
+        </button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- CANVAS MODAL -->
+<div class="modal-overlay" id="modal-canvas">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeModal('canvas')">✕</button>
+    <div class="modal-title">🎨 Export for Canvas LMS</div>
+    <div class="modal-subtitle">Copy the HTML below and paste it into a Canvas page using the Rich Content Editor's HTML source view.</div>
+
+    <div class="step-row"><div class="step-bubble">1</div><p>In Canvas, open or create a <strong>Page</strong> in your course.</p></div>
+    <div class="step-row"><div class="step-bubble">2</div><p>Click the three-dot menu in the Rich Content Editor toolbar and choose <strong>HTML Editor</strong> (or press the &lt;/&gt; button).</p></div>
+    <div class="step-row"><div class="step-bubble">3</div><p>Select all existing code, delete it, then <strong>paste the code below</strong>.</p></div>
+    <div class="step-row"><div class="step-bubble">4</div><p>Switch back to the visual editor, review, and <strong>Save</strong>.</p></div>
+
+    <div class="modal-section">
+      <div class="modal-section-label">Canvas HTML — select all and copy</div>
+      <div class="copy-block" id="canvas-html-block" style="font-size:11px;"></div>
+    </div>
+    <div class="modal-actions">
+      <button class="modal-btn primary" onclick="copyToClipboard('canvas-html-block', this)">📋 Copy HTML</button>
+      <button class="modal-btn secondary" onclick="closeModal('canvas')">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- GOOGLE CLASSROOM MODAL -->
+<div class="modal-overlay" id="modal-gc">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeModal('gc')">✕</button>
+    <div class="modal-title">🏫 Export for Google Classroom</div>
+    <div class="modal-subtitle">Post this WebQuest as a Classroom assignment in two steps — the instructions go in the assignment description, and the full content goes into a linked Google Doc.</div>
+
+    <div class="step-row"><div class="step-bubble">1</div><p>In Google Classroom, click <strong>Create → Assignment</strong>. Paste the assignment description below into the <strong>Instructions</strong> field.</p></div>
+    <div class="step-row"><div class="step-bubble">2</div><p>Open a new <strong>Google Doc</strong>. Paste the full WebQuest content below into the Doc. Attach it to the assignment using <strong>Add → Google Drive</strong>.</p></div>
+    <div class="step-row"><div class="step-bubble">3</div><p>Set due date, assign to the right class, and click <strong>Assign</strong>.</p></div>
+
+    <div class="modal-section">
+      <div class="modal-section-label">Assignment description (paste into Classroom instructions)</div>
+      <div class="copy-block" id="gc-desc-block"></div>
+    </div>
+    <div class="modal-actions" style="margin-bottom:1.25rem;">
+      <button class="modal-btn primary" onclick="copyToClipboard('gc-desc-block', this)">📋 Copy description</button>
+    </div>
+
+    <div class="modal-section">
+      <div class="modal-section-label">Full WebQuest content (paste into a Google Doc)</div>
+      <div class="copy-block" id="gc-full-block"></div>
+    </div>
+    <div class="modal-actions">
+      <button class="modal-btn primary" onclick="copyToClipboard('gc-full-block', this)">📋 Copy full content</button>
+      <button class="modal-btn secondary" onclick="closeModal('gc')">Close</button>
+    </div>
+  </div>
+</div>
+
+<script>
+let selectedTopic = '';
+let selectedType = 'short';
+let currentGrade = '';
+let currentSubject = '';
+let currentWQ = null;
+
+function setType(t) {
+  selectedType = t;
+  document.getElementById('type-short').className = 'type-btn' + (t==='short' ? ' active' : '');
+  document.getElementById('type-long').className = 'type-btn' + (t==='long' ? ' active' : '');
+}
+
+function toggleSection(id) {
+  const body = document.getElementById('body-'+id);
+  const arrow = document.getElementById('arrow-'+id);
+  const isOpen = body.classList.contains('open');
+  body.classList.toggle('open', !isOpen);
+  arrow.classList.toggle('open', !isOpen);
+}
+
+function openModal(type) {
+  buildExportContent(type);
+  document.getElementById('modal-'+type).classList.add('open');
+}
+function closeModal(type) {
+  document.getElementById('modal-'+type).classList.remove('open');
+}
+
+async function copyToClipboard(blockId, btn) {
+  const text = document.getElementById(blockId).textContent;
+  await navigator.clipboard.writeText(text);
+  const orig = btn.textContent;
+  btn.textContent = '✅ Copied!';
+  setTimeout(() => { btn.textContent = orig; }, 2000);
+}
+
+async function loadTopics() {
+  const grade = document.getElementById('grade-select').value;
+  const subject = document.getElementById('subject-select').value;
+  if (!grade || !subject) { alert('Please select both a grade level and subject area.'); return; }
+  currentGrade = grade;
+  currentSubject = subject;
+  document.getElementById('topic-card').style.display = 'block';
+  document.getElementById('options-card').style.display = 'none';
+  document.getElementById('topic-grid').innerHTML = '<div class="topics-loading">Loading California Content Standards topics...</div>';
+  selectedTopic = '';
+  const gradeLabel = grade === 'K' ? 'Kindergarten' : 'Grade ' + grade;
+  try {
+    const res = await fetch('/api/claude-proxy', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-6',
+        max_tokens: 1000,
+        messages: [{ role: 'user', content: `You are a California curriculum expert. List exactly 10 specific topic areas from the California Content Standards for ${subject} at the ${gradeLabel} level that would make excellent WebQuest subjects for student inquiry. Return ONLY a JSON array of 10 short topic strings (5-8 words each). No explanation, no markdown, just the raw JSON array. Make them specific, interesting, and inquiry-worthy — not generic chapter titles.` }]
+      })
+    });
+    const data = await res.json();
+    const topics = JSON.parse(data.content[0].text.trim().replace(/```json|```/g,'').trim());
+    const grid = document.getElementById('topic-grid');
+    grid.innerHTML = '';
+    topics.forEach(topic => {
+      const pill = document.createElement('button');
+      pill.className = 'topic-pill';
+      pill.textContent = topic;
+      pill.onclick = () => selectTopic(topic, pill);
+      grid.appendChild(pill);
+    });
+  } catch(e) {
+    document.getElementById('topic-grid').innerHTML = '<div class="topics-loading" style="color:#9F1239;">Error loading topics. Please try again.</div>';
+  }
+}
+
+function selectTopic(topic, pillEl) {
+  selectedTopic = topic;
+  document.querySelectorAll('.topic-pill').forEach(p => p.classList.remove('selected'));
+  pillEl.classList.add('selected');
+  document.getElementById('options-card').style.display = 'block';
+  document.getElementById('options-card').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+async function generateWebQuest() {
+  if (!selectedTopic) { alert('Please select a topic first.'); return; }
+  const grouping = document.getElementById('grouping-select').value;
+  const tech = document.getElementById('tech-select').value;
+  const gradeLabel = currentGrade === 'K' ? 'Kindergarten' : 'Grade ' + currentGrade;
+
+  document.getElementById('setup-section').style.display = 'none';
+  document.getElementById('webquest-output').style.display = 'block';
+  document.getElementById('output-loading').style.display = 'block';
+  document.getElementById('wq-sections').style.display = 'none';
+  document.getElementById('create-challenge').style.display = 'none';
+  document.getElementById('export-section').style.display = 'none';
+  document.getElementById('wq-title').textContent = 'Building your WebQuest...';
+  document.getElementById('wq-meta').textContent = '';
+  document.getElementById('wq-guiding-q').textContent = 'Crafting your guiding question...';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+
+  const prompt = `You are an expert instructional designer creating a ${selectedType}-term WebQuest for ${gradeLabel} ${currentSubject} students on the topic: "${selectedTopic}". The WebQuest should use ${tech} as the primary student creation tool, involve ${grouping}, and be aligned to California Content Standards. Students must CREATE and MAKE something, not just consume information. Design for inquiry, collaboration, and authentic real-world tasks.
+
+Return ONLY a valid JSON object with this exact structure (no markdown, no explanation):
+{
+  "title": "Engaging specific WebQuest title",
+  "subtitle": "${gradeLabel} | ${currentSubject} | ${selectedType === 'short' ? '1-3 Class Periods' : '1-2 Weeks'}",
+  "guidingQuestion": "One compelling open-ended question that drives the entire quest",
+  "introduction": {
+    "scenario": "2-3 paragraph engaging hook placing students in a real-world role or scenario. Vivid and specific. End with a challenge statement.",
+    "roleSetup": "Brief description of the role students will play"
+  },
+  "task": {
+    "overview": "Clear description of the final product students will create",
+    "roles": [
+      {"icon": "emoji", "name": "Role Name", "description": "What this role does"},
+      {"icon": "emoji", "name": "Role Name", "description": "What this role does"},
+      {"icon": "emoji", "name": "Role Name", "description": "What this role does"},
+      {"icon": "emoji", "name": "Role Name", "description": "What this role does"}
+    ],
+    "finalProduct": "Specific description of the deliverable using ${tech}"
+  },
+  "process": {
+    "intro": "Brief intro about how the process is structured",
+    "steps": [
+      {"title": "Step title", "description": "What students do"},
+      {"title": "Step title", "description": "What students do"},
+      {"title": "Step title", "description": "What students do"},
+      {"title": "Step title", "description": "What students do"},
+      {"title": "Create your product", "description": "Students build their deliverable using ${tech}"},
+      {"title": "Share and reflect", "description": "Present and discuss findings"}
+    ]
+  },
+  "resources": [
+    {"icon": "🌐", "name": "Resource name", "url": "https://real-url.org", "description": "What students find here"},
+    {"icon": "📊", "name": "Resource name", "url": "https://real-url.org", "description": "Description"},
+    {"icon": "🎥", "name": "Resource name", "url": "https://real-url.org", "description": "Description"},
+    {"icon": "📰", "name": "Resource name", "url": "https://real-url.org", "description": "Description"},
+    {"icon": "🔬", "name": "Resource name", "url": "https://real-url.org", "description": "Description"}
+  ],
+  "evaluation": {
+    "intro": "Brief explanation of how work will be assessed",
+    "criteria": [
+      {"category": "Content & Accuracy", "score4": "Exceeds specific descriptor", "score3": "Meets descriptor", "score2": "Approaching descriptor", "score1": "Beginning descriptor"},
+      {"category": "Critical Thinking", "score4": "Exceeds", "score3": "Meets", "score2": "Approaching", "score1": "Beginning"},
+      {"category": "Creation & Presentation", "score4": "Exceeds", "score3": "Meets", "score2": "Approaching", "score1": "Beginning"},
+      {"category": "Collaboration & Process", "score4": "Exceeds", "score3": "Meets", "score2": "Approaching", "score1": "Beginning"}
+    ]
+  },
+  "conclusion": {
+    "reflection": "2 paragraph reflection prompt connecting to real world",
+    "extensions": ["Extension 1", "Extension 2", "Extension 3"],
+    "realWorldConnection": "One sentence connecting to an actual career or civic role"
+  },
+  "creationOptions": [
+    {"icon": "🎨", "name": "Primary deliverable", "description": "Using ${tech}"},
+    {"icon": "📝", "name": "Alt option 2", "description": "Brief description"},
+    {"icon": "🎙", "name": "Alt option 3", "description": "Brief description"}
+  ]
+}`;
+
+  try {
+    const res = await fetch('/api/claude-proxy', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ model: 'claude-sonnet-4-6', max_tokens: 4000, messages: [{ role: 'user', content: prompt }] })
+    });
+    const data = await res.json();
+    const raw = data.content[0].text.trim().replace(/```json|```/g,'').trim();
+    currentWQ = JSON.parse(raw);
+    renderWebQuest(currentWQ, gradeLabel);
+  } catch(e) {
+    document.getElementById('output-loading').innerHTML = `<div class="error-state">Something went wrong. <a href="#" onclick="generateWebQuest()" style="color:inherit;font-weight:600;">Try again</a></div>`;
+  }
+}
+
+function renderWebQuest(wq, gradeLabel) {
+  document.getElementById('wq-title').textContent = wq.title;
+  document.getElementById('wq-meta').textContent = wq.subtitle;
+  document.getElementById('wq-guiding-q').textContent = wq.guidingQuestion;
+
+  document.getElementById('content-intro').innerHTML = `
+    <div style="background:var(--hive-teal-light);border-left:3px solid var(--hive-teal);border-radius:0 var(--radius-md) var(--radius-md) 0;padding:1rem 1.25rem;margin-bottom:1.25rem;">
+      <p style="font-size:12px;font-weight:600;color:var(--hive-teal-dark);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;">YOUR ROLE</p>
+      <p style="margin:0;font-weight:500;">${wq.introduction.roleSetup}</p>
+    </div>
+    ${wq.introduction.scenario.split('\n').filter(p=>p.trim()).map(p=>`<p>${p}</p>`).join('')}
+  `;
+
+  document.getElementById('content-task').innerHTML = `
+    <p>${wq.task.overview}</p>
+    <h4>Team Roles</h4>
+    <div class="role-cards">${wq.task.roles.map(r=>`<div class="role-card"><div class="role-icon">${r.icon}</div><div class="role-name">${r.name}</div><div class="role-desc">${r.description}</div></div>`).join('')}</div>
+    <h4>Your Final Deliverable</h4>
+    <div style="background:var(--hive-purple-light);border-radius:var(--radius-md);padding:1rem 1.25rem;margin-top:.5rem;"><p style="margin:0;font-weight:500;color:var(--hive-purple);">🎨 ${wq.task.finalProduct}</p></div>
+  `;
+
+  document.getElementById('content-process').innerHTML = `
+    <p>${wq.process.intro}</p>
+    <div class="process-steps" style="margin-top:1rem;">${wq.process.steps.map((s,i)=>`<div class="process-step"><div class="process-step-num">${i+1}</div><div class="process-step-content"><strong>${s.title}</strong><p>${s.description}</p></div></div>`).join('')}</div>
+  `;
+
+  document.getElementById('content-resources').innerHTML = `
+    <p style="font-size:13px;color:var(--ink-muted);margin-bottom:1rem;">These resources have been selected for your inquiry. Use them to build knowledge before creating your product.</p>
+    ${wq.resources.map(r=>`<div class="resource-item"><div class="resource-icon">${r.icon}</div><div class="resource-content"><strong><a href="${r.url}" target="_blank" style="color:var(--hive-teal);text-decoration:none;">${r.name} ↗</a></strong><p>${r.description}</p></div></div>`).join('')}
+  `;
+
+  document.getElementById('content-evaluation').innerHTML = `
+    <p>${wq.evaluation.intro}</p>
+    <div style="overflow-x:auto;margin-top:1rem;">
+      <table class="rubric-table">
+        <thead><tr><th style="min-width:120px;">Criteria</th><th>4 — Exceeds</th><th>3 — Meets</th><th>2 — Approaching</th><th>1 — Beginning</th></tr></thead>
+        <tbody>${wq.evaluation.criteria.map(c=>`<tr><td style="font-weight:600;">${c.category}</td><td><span class="score-badge score-4">4</span><br>${c.score4}</td><td><span class="score-badge score-3">3</span><br>${c.score3}</td><td><span class="score-badge score-2">2</span><br>${c.score2}</td><td><span class="score-badge score-1">1</span><br>${c.score1}</td></tr>`).join('')}</tbody>
+      </table>
+    </div>
+  `;
+
+  document.getElementById('content-conclusion').innerHTML = `
+    ${wq.conclusion.reflection.split('\n').filter(p=>p.trim()).map(p=>`<p>${p}</p>`).join('')}
+    <h4>Extension Activities</h4>
+    <ul>${wq.conclusion.extensions.map(e=>`<li>${e}</li>`).join('')}</ul>
+    <div style="background:var(--hive-amber-light);border-radius:var(--radius-md);padding:1rem 1.25rem;margin-top:1rem;"><p style="margin:0;font-size:13px;font-weight:500;color:var(--hive-amber-dark);">🌍 Real-world connection: ${wq.conclusion.realWorldConnection}</p></div>
+  `;
+
+  document.getElementById('deliverable-cards').innerHTML = wq.creationOptions.map(c=>`<div class="deliverable-card"><span class="d-icon">${c.icon}</span><strong>${c.name}</strong><span>${c.description}</span></div>`).join('');
+
+  document.getElementById('output-loading').style.display = 'none';
+  document.getElementById('wq-sections').style.display = 'flex';
+  document.getElementById('create-challenge').style.display = 'block';
+  document.getElementById('export-section').style.display = 'block';
+}
+
+function exportPDF() {
+  // Open all sections before printing
+  ['intro','task','process','resources','evaluation','conclusion'].forEach(id => {
+    document.getElementById('body-'+id).classList.add('open');
+    document.getElementById('arrow-'+id).classList.add('open');
+  });
+  setTimeout(() => window.print(), 150);
+}
+
+function buildExportContent(type) {
+  if (!currentWQ) return;
+  const wq = currentWQ;
+
+  if (type === 'canvas') {
+    const html = buildCanvasHTML(wq);
+    document.getElementById('canvas-html-block').textContent = html;
+  }
+
+  if (type === 'gc') {
+    const desc = buildGCDescription(wq);
+    const full = buildGCFullContent(wq);
+    document.getElementById('gc-desc-block').textContent = desc;
+    document.getElementById('gc-full-block').textContent = full;
+  }
+}
+
+function buildCanvasHTML(wq) {
+  const rubricRows = wq.evaluation.criteria.map(c =>
+    `<tr><td style="font-weight:bold;padding:8px 12px;border:1px solid #ddd;">${c.category}</td><td style="padding:8px 12px;border:1px solid #ddd;background:#f0fdf4;">${c.score4}</td><td style="padding:8px 12px;border:1px solid #ddd;background:#eff6ff;">${c.score3}</td><td style="padding:8px 12px;border:1px solid #ddd;background:#fefce8;">${c.score2}</td><td style="padding:8px 12px;border:1px solid #ddd;background:#fff1f2;">${c.score1}</td></tr>`
+  ).join('');
+
+  const stepsHtml = wq.process.steps.map((s, i) =>
+    `<li style="margin-bottom:12px;"><strong>${s.title}</strong><br>${s.description}</li>`
+  ).join('');
+
+  const resourcesHtml = wq.resources.map(r =>
+    `<li style="margin-bottom:10px;">${r.icon} <strong><a href="${r.url}">${r.name}</a></strong> — ${r.description}</li>`
+  ).join('');
+
+  return `<!-- WebQuest generated by WebQuest Generator -->
+<div style="font-family: Arial, sans-serif; max-width: 860px; margin: 0 auto; color: #1a1a1a;">
+
+  <div style="background: linear-gradient(135deg, #0D9488, #0F766E); color: white; padding: 32px; border-radius: 12px; margin-bottom: 24px;">
+    <p style="font-size: 11px; font-weight: bold; letter-spacing: 2px; text-transform: uppercase; opacity: 0.8; margin: 0 0 8px;">🔍 WEBQUEST</p>
+    <h1 style="margin: 0 0 8px; font-size: 28px; line-height: 1.2;">${wq.title}</h1>
+    <p style="margin: 0; opacity: 0.85; font-size: 14px;">${wq.subtitle}</p>
+  </div>
+
+  <div style="background: #f8f9fa; border-left: 4px solid #F59E0B; padding: 16px 20px; border-radius: 0 8px 8px 0; margin-bottom: 28px;">
+    <p style="font-size: 11px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; color: #92400E; margin: 0 0 4px;">GUIDING QUESTION</p>
+    <p style="font-size: 17px; font-style: italic; font-weight: 500; margin: 0; color: #1a1a1a;">${wq.guidingQuestion}</p>
+  </div>
+
+  <h2 style="font-size: 20px; border-bottom: 2px solid #e5e7eb; padding-bottom: 8px; margin-bottom: 16px;">🎬 Introduction</h2>
+  <div style="background: #CCFBF1; border-left: 3px solid #0D9488; padding: 12px 16px; border-radius: 0 6px 6px 0; margin-bottom: 16px;">
+    <p style="font-size: 12px; font-weight: bold; text-transform: uppercase; color: #134E4A; margin: 0 0 4px;">YOUR ROLE</p>
+    <p style="margin: 0; font-weight: 500;">${wq.introduction.roleSetup}</p>
+  </div>
+  ${wq.introduction.scenario.split('\n').filter(p=>p.trim()).map(p=>`<p style="margin-bottom:12px;line-height:1.7;">${p}</p>`).join('')}
+
+  <h2 style="font-size: 20px; border-bottom: 2px solid #e5e7eb; padding-bottom: 8px; margin: 28px 0 16px;">🎯 Task</h2>
+  <p style="line-height:1.7;margin-bottom:16px;">${wq.task.overview}</p>
+  <h3 style="font-size:15px;margin-bottom:12px;">Team Roles</h3>
+  <table style="width:100%;border-collapse:collapse;margin-bottom:16px;">
+    <tr>${wq.task.roles.map(r=>`<td style="border:1px solid #ddd;padding:12px;vertical-align:top;width:25%;"><span style="font-size:24px;">${r.icon}</span><br><strong style="font-size:13px;">${r.name}</strong><br><span style="font-size:12px;color:#666;">${r.description}</span></td>`).join('')}</tr>
+  </table>
+  <div style="background:#EDE9FE;border-radius:8px;padding:14px 18px;">
+    <p style="margin:0;font-weight:600;color:#5B21B6;">🎨 Final Product: ${wq.task.finalProduct}</p>
+  </div>
+
+  <h2 style="font-size: 20px; border-bottom: 2px solid #e5e7eb; padding-bottom: 8px; margin: 28px 0 16px;">🗺 Process</h2>
+  <p style="margin-bottom:16px;">${wq.process.intro}</p>
+  <ol style="padding-left:24px;">${stepsHtml}</ol>
+
+  <h2 style="font-size: 20px; border-bottom: 2px solid #e5e7eb; padding-bottom: 8px; margin: 28px 0 16px;">🔗 Resources</h2>
+  <p style="margin-bottom:12px;color:#555;font-size:14px;">Use these pre-selected resources for your research. Do not use other websites without teacher approval.</p>
+  <ul style="padding-left:20px;">${resourcesHtml}</ul>
+
+  <h2 style="font-size: 20px; border-bottom: 2px solid #e5e7eb; padding-bottom: 8px; margin: 28px 0 16px;">📊 Evaluation Rubric</h2>
+  <p style="margin-bottom:12px;">${wq.evaluation.intro}</p>
+  <table style="width:100%;border-collapse:collapse;font-size:13px;">
+    <thead><tr>
+      <th style="background:#f3f4f6;padding:10px 12px;text-align:left;border:1px solid #ddd;font-size:12px;text-transform:uppercase;letter-spacing:.5px;">Criteria</th>
+      <th style="background:#f0fdf4;padding:10px 12px;text-align:left;border:1px solid #ddd;font-size:12px;text-transform:uppercase;letter-spacing:.5px;">4 — Exceeds</th>
+      <th style="background:#eff6ff;padding:10px 12px;text-align:left;border:1px solid #ddd;font-size:12px;text-transform:uppercase;letter-spacing:.5px;">3 — Meets</th>
+      <th style="background:#fefce8;padding:10px 12px;text-align:left;border:1px solid #ddd;font-size:12px;text-transform:uppercase;letter-spacing:.5px;">2 — Approaching</th>
+      <th style="background:#fff1f2;padding:10px 12px;text-align:left;border:1px solid #ddd;font-size:12px;text-transform:uppercase;letter-spacing:.5px;">1 — Beginning</th>
+    </tr></thead>
+    <tbody>${rubricRows}</tbody>
+  </table>
+
+  <h2 style="font-size: 20px; border-bottom: 2px solid #e5e7eb; padding-bottom: 8px; margin: 28px 0 16px;">🌟 Conclusion</h2>
+  ${wq.conclusion.reflection.split('\n').filter(p=>p.trim()).map(p=>`<p style="line-height:1.7;margin-bottom:12px;">${p}</p>`).join('')}
+  <h3 style="font-size:15px;margin:16px 0 8px;">Extension Activities</h3>
+  <ul style="padding-left:20px;">${wq.conclusion.extensions.map(e=>`<li style="margin-bottom:6px;">${e}</li>`).join('')}</ul>
+  <div style="background:#FEF3C7;border-radius:8px;padding:12px 16px;margin-top:16px;">
+    <p style="margin:0;font-size:13px;font-weight:600;color:#92400E;">🌍 ${wq.conclusion.realWorldConnection}</p>
+  </div>
+
+  <p style="margin-top:32px;font-size:11px;color:#aaa;text-align:center;">Generated by WebQuest Generator</p>
+</div>`;
+}
+
+function buildGCDescription(wq) {
+  return `📚 WEBQUEST: ${wq.title}
+${wq.subtitle}
+
+❓ GUIDING QUESTION
+${wq.guidingQuestion}
+
+📋 WHAT YOU'LL DO
+${wq.task.overview}
+
+🎨 YOUR FINAL PRODUCT
+${wq.task.finalProduct}
+
+📎 See the attached Google Doc for the complete WebQuest including your role, step-by-step process, resources, and the grading rubric.
+
+✅ DUE DATE: [Add your due date here]
+👥 GROUPING: [Add grouping details here]`;
+}
+
+function buildGCFullContent(wq) {
+  const divider = '\n' + '─'.repeat(60) + '\n';
+  const steps = wq.process.steps.map((s,i) => `  Step ${i+1}: ${s.title}\n  ${s.description}`).join('\n\n');
+  const resources = wq.resources.map(r => `  • ${r.name}\n    ${r.url}\n    ${r.description}`).join('\n\n');
+  const rubric = wq.evaluation.criteria.map(c =>
+    `  ${c.category}\n    4 (Exceeds): ${c.score4}\n    3 (Meets): ${c.score3}\n    2 (Approaching): ${c.score2}\n    1 (Beginning): ${c.score1}`
+  ).join('\n\n');
+  const extensions = wq.conclusion.extensions.map(e => `  • ${e}`).join('\n');
+
+  return `WEBQUEST: ${wq.title}
+${wq.subtitle}
+Generated by WebQuest Generator
+${'═'.repeat(60)}
+
+❓ GUIDING QUESTION
+${wq.guidingQuestion}
+${divider}
+🎬 INTRODUCTION — Your Role & Mission
+
+YOUR ROLE: ${wq.introduction.roleSetup}
+
+${wq.introduction.scenario}
+${divider}
+🎯 TASK — What You Will Create
+
+${wq.task.overview}
+
+TEAM ROLES:
+${wq.task.roles.map(r => `  ${r.icon} ${r.name}: ${r.description}`).join('\n')}
+
+FINAL PRODUCT:
+  ${wq.task.finalProduct}
+${divider}
+🗺 PROCESS — Step by Step
+
+${wq.process.intro}
+
+${steps}
+${divider}
+🔗 RESOURCES — Use These for Your Research
+
+${resources}
+${divider}
+📊 EVALUATION RUBRIC
+
+${wq.evaluation.intro}
+
+${rubric}
+${divider}
+🌟 CONCLUSION — Reflect & Connect
+
+${wq.conclusion.reflection}
+
+EXTENSION ACTIVITIES:
+${extensions}
+
+🌍 Real-World Connection: ${wq.conclusion.realWorldConnection}
+${'═'.repeat(60)}
+Generated by WebQuest Generator`;
+}
+
+function resetForm() {
+  currentWQ = null;
+  selectedTopic = '';
+  document.getElementById('setup-section').style.display = 'block';
+  document.getElementById('webquest-output').style.display = 'none';
+  document.getElementById('topic-card').style.display = 'none';
+  document.getElementById('options-card').style.display = 'none';
+  document.getElementById('grade-select').value = '';
+  document.getElementById('subject-select').value = '';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// Close modals on overlay click
+document.querySelectorAll('.modal-overlay').forEach(overlay => {
+  overlay.addEventListener('click', e => {
+    if (e.target === overlay) {
+      overlay.classList.remove('open');
+    }
+  });
+});
+</script>
+</body>
+</html>
