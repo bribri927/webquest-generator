@@ -1,7 +1,7 @@
 [build]
   functions = "netlify/functions"
 
-[functions]
+[functions."claude-proxy"]
   timeout = 26
 
 [[redirects]]
