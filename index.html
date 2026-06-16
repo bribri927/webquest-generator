@@ -621,7 +621,7 @@ async function loadTopics() {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-6',
+        model: 'claude-haiku-4-5',
         max_tokens: 400,
         messages: [{ role: 'user', content: `You are a California curriculum expert. List exactly 10 specific topic areas from the California Content Standards for ${subject} at the ${gradeLabel} level that would make excellent WebQuest subjects for student inquiry. Return ONLY a JSON array of 10 short topic strings (5-8 words each). No explanation, no markdown, just the raw JSON array. Make them specific, interesting, and inquiry-worthy — not generic chapter titles.` }]
       })
@@ -674,7 +674,7 @@ async function generateWebQuest() {
     const res = await fetch('/api/claude-proxy', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ model: 'claude-sonnet-4-6', max_tokens: 1500, messages: [{ role: 'user', content: prompt }] })
+      body: JSON.stringify({ model: 'claude-haiku-4-5', max_tokens: 1500, messages: [{ role: 'user', content: prompt }] })
     });
     const data = await res.json();
     const raw = data.content[0].text.trim().replace(/```json|```/g,'').trim();
