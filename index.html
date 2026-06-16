@@ -622,7 +622,7 @@ async function loadTopics() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         model: 'claude-sonnet-4-6',
-        max_tokens: 1000,
+        max_tokens: 400,
         messages: [{ role: 'user', content: `You are a California curriculum expert. List exactly 10 specific topic areas from the California Content Standards for ${subject} at the ${gradeLabel} level that would make excellent WebQuest subjects for student inquiry. Return ONLY a JSON array of 10 short topic strings (5-8 words each). No explanation, no markdown, just the raw JSON array. Make them specific, interesting, and inquiry-worthy — not generic chapter titles.` }]
       })
     });
@@ -667,71 +667,14 @@ async function generateWebQuest() {
   document.getElementById('wq-guiding-q').textContent = 'Crafting your guiding question...';
   window.scrollTo({ top: 0, behavior: 'smooth' });
 
-  const prompt = `You are an expert instructional designer creating a ${selectedType}-term WebQuest for ${gradeLabel} ${currentSubject} students on the topic: "${selectedTopic}". The WebQuest should use ${tech} as the primary student creation tool, involve ${grouping}, and be aligned to California Content Standards. Students must CREATE and MAKE something, not just consume information. Design for inquiry, collaboration, and authentic real-world tasks.
-
-Return ONLY a valid JSON object with this exact structure (no markdown, no explanation):
-{
-  "title": "Engaging specific WebQuest title",
-  "subtitle": "${gradeLabel} | ${currentSubject} | ${selectedType === 'short' ? '1-3 Class Periods' : '1-2 Weeks'}",
-  "guidingQuestion": "One compelling open-ended question that drives the entire quest",
-  "introduction": {
-    "scenario": "2-3 paragraph engaging hook placing students in a real-world role or scenario. Vivid and specific. End with a challenge statement.",
-    "roleSetup": "Brief description of the role students will play"
-  },
-  "task": {
-    "overview": "Clear description of the final product students will create",
-    "roles": [
-      {"icon": "emoji", "name": "Role Name", "description": "What this role does"},
-      {"icon": "emoji", "name": "Role Name", "description": "What this role does"},
-      {"icon": "emoji", "name": "Role Name", "description": "What this role does"},
-      {"icon": "emoji", "name": "Role Name", "description": "What this role does"}
-    ],
-    "finalProduct": "Specific description of the deliverable using ${tech}"
-  },
-  "process": {
-    "intro": "Brief intro about how the process is structured",
-    "steps": [
-      {"title": "Step title", "description": "What students do"},
-      {"title": "Step title", "description": "What students do"},
-      {"title": "Step title", "description": "What students do"},
-      {"title": "Step title", "description": "What students do"},
-      {"title": "Create your product", "description": "Students build their deliverable using ${tech}"},
-      {"title": "Share and reflect", "description": "Present and discuss findings"}
-    ]
-  },
-  "resources": [
-    {"icon": "🌐", "name": "Resource name", "url": "https://real-url.org", "description": "What students find here"},
-    {"icon": "📊", "name": "Resource name", "url": "https://real-url.org", "description": "Description"},
-    {"icon": "🎥", "name": "Resource name", "url": "https://real-url.org", "description": "Description"},
-    {"icon": "📰", "name": "Resource name", "url": "https://real-url.org", "description": "Description"},
-    {"icon": "🔬", "name": "Resource name", "url": "https://real-url.org", "description": "Description"}
-  ],
-  "evaluation": {
-    "intro": "Brief explanation of how work will be assessed",
-    "criteria": [
-      {"category": "Content & Accuracy", "score4": "Exceeds specific descriptor", "score3": "Meets descriptor", "score2": "Approaching descriptor", "score1": "Beginning descriptor"},
-      {"category": "Critical Thinking", "score4": "Exceeds", "score3": "Meets", "score2": "Approaching", "score1": "Beginning"},
-      {"category": "Creation & Presentation", "score4": "Exceeds", "score3": "Meets", "score2": "Approaching", "score1": "Beginning"},
-      {"category": "Collaboration & Process", "score4": "Exceeds", "score3": "Meets", "score2": "Approaching", "score1": "Beginning"}
-    ]
-  },
-  "conclusion": {
-    "reflection": "2 paragraph reflection prompt connecting to real world",
-    "extensions": ["Extension 1", "Extension 2", "Extension 3"],
-    "realWorldConnection": "One sentence connecting to an actual career or civic role"
-  },
-  "creationOptions": [
-    {"icon": "🎨", "name": "Primary deliverable", "description": "Using ${tech}"},
-    {"icon": "📝", "name": "Alt option 2", "description": "Brief description"},
-    {"icon": "🎙", "name": "Alt option 3", "description": "Brief description"}
-  ]
-}`;
+  const prompt = `Create a ${selectedType}-term WebQuest for ${gradeLabel} ${currentSubject} on "${selectedTopic}". Use ${tech}, involve ${grouping}, align to California standards. Students must CREATE, not just consume. Return ONLY raw JSON, no markdown:
+{"title":"engaging title","subtitle":"${gradeLabel} | ${currentSubject}","guidingQuestion":"open-ended driving question","introduction":{"roleSetup":"student role in 1 sentence","scenario":"2 short paragraphs: vivid hook + challenge statement"},"task":{"overview":"what students make in 2 sentences","roles":[{"icon":"emoji","name":"Role","description":"brief duty"},{"icon":"emoji","name":"Role","description":"brief duty"},{"icon":"emoji","name":"Role","description":"brief duty"},{"icon":"emoji","name":"Role","description":"brief duty"}],"finalProduct":"specific deliverable using ${tech}"},"process":{"intro":"1 sentence","steps":[{"title":"Explore","description":"Students investigate the topic"},{"title":"Research","description":"Students use provided resources"},{"title":"Analyze","description":"Students synthesize findings"},{"title":"Create","description":"Students build product using ${tech}"},{"title":"Share","description":"Groups present and reflect"}]},"resources":[{"icon":"🌐","name":"Resource 1","url":"https://example.org","description":"what to find here"},{"icon":"📊","name":"Resource 2","url":"https://example.org","description":"what to find here"},{"icon":"🎥","name":"Resource 3","url":"https://example.org","description":"what to find here"},{"icon":"📰","name":"Resource 4","url":"https://example.org","description":"what to find here"}],"evaluation":{"intro":"1 sentence","criteria":[{"category":"Content","score4":"Exceeds","score3":"Meets","score2":"Approaching","score1":"Beginning"},{"category":"Critical Thinking","score4":"Exceeds","score3":"Meets","score2":"Approaching","score1":"Beginning"},{"category":"Creation","score4":"Exceeds","score3":"Meets","score2":"Approaching","score1":"Beginning"},{"category":"Collaboration","score4":"Exceeds","score3":"Meets","score2":"Approaching","score1":"Beginning"}]},"conclusion":{"reflection":"2 sentences prompting reflection","extensions":["idea 1","idea 2","idea 3"],"realWorldConnection":"1 sentence career/civic link"},"creationOptions":[{"icon":"🎨","name":"Option 1","description":"using ${tech}"},{"icon":"📝","name":"Option 2","description":"brief"},{"icon":"🎙","name":"Option 3","description":"brief"}]}`;
 
   try {
     const res = await fetch('/api/claude-proxy', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ model: 'claude-sonnet-4-6', max_tokens: 4000, messages: [{ role: 'user', content: prompt }] })
+      body: JSON.stringify({ model: 'claude-sonnet-4-6', max_tokens: 1500, messages: [{ role: 'user', content: prompt }] })
     });
     const data = await res.json();
     const raw = data.content[0].text.trim().replace(/```json|```/g,'').trim();
