@@ -285,7 +285,7 @@
         <div class="step-num">1</div>
         <div>
           <div class="step-title">Tell us about your class</div>
-          <div class="step-sub">Grade level and subject area</div>
+          <div class="step-sub">Grade level, subject area, and standards framework</div>
         </div>
       </div>
       <div class="form-row">
@@ -310,11 +310,11 @@
         </div>
         <div class="form-group">
           <label for="subject-select">Subject area</label>
-          <select id="subject-select">
+          <select id="subject-select" onchange="updateStandards()">
             <option value="">Select a subject...</option>
             <option value="ELA">English Language Arts</option>
             <option value="Math">Mathematics</option>
-            <option value="Science">Science (NGSS)</option>
+            <option value="Science">Science</option>
             <option value="Social Studies">Social Studies / History</option>
             <option value="Computer Science">Computer Science</option>
             <option value="Visual Arts">Visual Arts</option>
@@ -324,6 +324,12 @@
             <option value="World Language">World Language</option>
           </select>
         </div>
+      </div>
+      <div class="form-group" id="standards-group" style="margin-bottom: 1.25rem; display: none;">
+        <label for="standards-select">Align to standards</label>
+        <select id="standards-select">
+          <option value="">Select standards framework...</option>
+        </select>
       </div>
       <button class="generate-btn" onclick="loadTopics()" style="background: var(--hive-teal); max-width: 280px;">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
@@ -336,11 +342,11 @@
         <div class="step-num">2</div>
         <div>
           <div class="step-title">Choose a topic</div>
-          <div class="step-sub">Based on California Content Standards for your grade and subject</div>
+          <div class="step-sub" id="topic-card-sub">Based on selected standards for your grade and subject</div>
         </div>
       </div>
       <div class="topic-grid" id="topic-grid">
-        <div class="topics-loading">Loading topics from California Content Standards...</div>
+        <div class="topics-loading" id="topics-loading-text">Loading topics...</div>
       </div>
     </div>
 
@@ -573,7 +579,93 @@ let selectedTopic = '';
 let selectedType = 'short';
 let currentGrade = '';
 let currentSubject = '';
+let currentStandards = '';
 let currentWQ = null;
+
+const STANDARDS_MAP = {
+  'ELA': [
+    { value: 'California ELA/ELD Framework (CA CCSS for ELA)', label: 'California ELA Standards (CA CCSS)' },
+    { value: 'Common Core State Standards for ELA (CCSS.ELA)', label: 'Common Core ELA (CCSS)' },
+    { value: 'ISTE Standards for Students', label: 'ISTE Standards (Technology)' },
+    { value: 'No specific standards framework — general best practices', label: 'General Best Practices' },
+  ],
+  'Math': [
+    { value: 'California Common Core State Standards for Mathematics (CA CCSSM)', label: 'California Math Standards (CA CCSSM)' },
+    { value: 'Common Core State Standards for Mathematics (CCSS.Math)', label: 'Common Core Math (CCSS)' },
+    { value: 'ISTE Standards for Students', label: 'ISTE Standards (Technology)' },
+    { value: 'No specific standards framework — general best practices', label: 'General Best Practices' },
+  ],
+  'Science': [
+    { value: 'California Next Generation Science Standards (CA NGSS)', label: 'California Science Standards (CA NGSS)' },
+    { value: 'Next Generation Science Standards (NGSS)', label: 'Next Generation Science Standards (NGSS)' },
+    { value: 'ISTE Standards for Students', label: 'ISTE Standards (Technology)' },
+    { value: 'No specific standards framework — general best practices', label: 'General Best Practices' },
+  ],
+  'Social Studies': [
+    { value: 'California History-Social Science Framework', label: 'California History-Social Science Framework' },
+    { value: 'C3 Framework for Social Studies State Standards', label: 'C3 Framework (Social Studies)' },
+    { value: 'ISTE Standards for Students', label: 'ISTE Standards (Technology)' },
+    { value: 'No specific standards framework — general best practices', label: 'General Best Practices' },
+  ],
+  'Computer Science': [
+    { value: 'California Computer Science Standards (CA CS)', label: 'California Computer Science Standards' },
+    { value: 'CSTA K-12 Computer Science Standards', label: 'CSTA K-12 CS Standards' },
+    { value: 'ISTE Standards for Students', label: 'ISTE Standards (Technology)' },
+    { value: 'No specific standards framework — general best practices', label: 'General Best Practices' },
+  ],
+  'Visual Arts': [
+    { value: 'California Visual and Performing Arts Standards (VAPA)', label: 'California VAPA Standards' },
+    { value: 'National Core Arts Standards', label: 'National Core Arts Standards' },
+    { value: 'ISTE Standards for Students', label: 'ISTE Standards (Technology)' },
+    { value: 'No specific standards framework — general best practices', label: 'General Best Practices' },
+  ],
+  'Music': [
+    { value: 'California Visual and Performing Arts Standards — Music (VAPA)', label: 'California VAPA Music Standards' },
+    { value: 'National Core Arts Standards — Music', label: 'National Core Arts Standards (Music)' },
+    { value: 'ISTE Standards for Students', label: 'ISTE Standards (Technology)' },
+    { value: 'No specific standards framework — general best practices', label: 'General Best Practices' },
+  ],
+  'PE': [
+    { value: 'California Physical Education Model Content Standards', label: 'California PE Standards' },
+    { value: 'SHAPE America National Standards for PE', label: 'SHAPE America National Standards' },
+    { value: 'No specific standards framework — general best practices', label: 'General Best Practices' },
+  ],
+  'Health': [
+    { value: 'California Health Education Content Standards', label: 'California Health Education Standards' },
+    { value: 'National Health Education Standards (NHES)', label: 'National Health Education Standards (NHES)' },
+    { value: 'No specific standards framework — general best practices', label: 'General Best Practices' },
+  ],
+  'World Language': [
+    { value: 'California World Language Content Standards', label: 'California World Language Standards' },
+    { value: 'ACTFL World-Readiness Standards for Learning Languages', label: 'ACTFL World-Readiness Standards' },
+    { value: 'No specific standards framework — general best practices', label: 'General Best Practices' },
+  ],
+};
+
+function updateStandards() {
+  const subject = document.getElementById('subject-select').value;
+  const group = document.getElementById('standards-group');
+  const sel = document.getElementById('standards-select');
+  
+  if (!subject) { group.style.display = 'none'; return; }
+  
+  const options = STANDARDS_MAP[subject] || [
+    { value: 'No specific standards framework — general best practices', label: 'General Best Practices' }
+  ];
+  
+  sel.innerHTML = '<option value="">Select standards framework...</option>';
+  options.forEach(opt => {
+    const el = document.createElement('option');
+    el.value = opt.value;
+    el.textContent = opt.label;
+    sel.appendChild(el);
+  });
+  
+  // Auto-select first option (California or subject-specific)
+  if (options.length > 0) sel.value = options[0].value;
+  
+  group.style.display = 'block';
+}
 
 function setType(t) {
   selectedType = t;
@@ -667,9 +759,10 @@ async function generateWebQuest() {
   document.getElementById('wq-guiding-q').textContent = 'Crafting your guiding question...';
   window.scrollTo({ top: 0, behavior: 'smooth' });
 
+  const standards = currentStandards || 'general best practices';
   const prompt = `IMPORTANT: Respond with ONLY a raw JSON object. No markdown, no code fences, no backticks. Start with { and end with }.
 
-Create a WebQuest for ${gradeLabel} ${currentSubject} on "${selectedTopic}" using ${tech} with ${grouping}. Keep ALL text fields SHORT (1-2 sentences max).
+Create a WebQuest for ${gradeLabel} ${currentSubject} on "${selectedTopic}" aligned to ${standards}. Use ${tech} with ${grouping}. Keep ALL text fields SHORT (1-2 sentences max).
 
 {"title":"short title","subtitle":"${gradeLabel} | ${currentSubject}","guidingQuestion":"one question","introduction":{"roleSetup":"one sentence role","scenario":"two sentences max"},"task":{"overview":"one sentence","roles":[{"icon":"🔍","name":"Researcher","description":"finds info"},{"icon":"✍️","name":"Writer","description":"writes content"},{"icon":"🎨","name":"Designer","description":"creates visuals"},{"icon":"📢","name":"Presenter","description":"shares work"}],"finalProduct":"one sentence describing ${tech} product"},"process":{"intro":"one sentence","steps":[{"title":"Explore","description":"one sentence"},{"title":"Research","description":"one sentence"},{"title":"Analyze","description":"one sentence"},{"title":"Create","description":"one sentence using ${tech}"},{"title":"Share","description":"one sentence"}]},"resources":[{"icon":"🌐","name":"Resource name","url":"https://example.org","description":"one sentence"},{"icon":"📊","name":"Resource name","url":"https://example.org","description":"one sentence"},{"icon":"🎥","name":"Resource name","url":"https://example.org","description":"one sentence"}],"evaluation":{"intro":"one sentence","criteria":[{"category":"Content","score4":"excellent","score3":"good","score2":"developing","score1":"beginning"},{"category":"Creativity","score4":"excellent","score3":"good","score2":"developing","score1":"beginning"},{"category":"Collaboration","score4":"excellent","score3":"good","score2":"developing","score1":"beginning"}]},"conclusion":{"reflection":"one sentence prompt","extensions":["idea 1","idea 2"],"realWorldConnection":"one sentence"},"creationOptions":[{"icon":"🎨","name":"Slideshow","description":"using ${tech}"},{"icon":"📝","name":"Infographic","description":"visual summary"},{"icon":"🎙","name":"Video","description":"recorded presentation"}]}`;
 
@@ -690,7 +783,7 @@ Create a WebQuest for ${gradeLabel} ${currentSubject} on "${selectedTopic}" usin
 
 function renderWebQuest(wq, gradeLabel) {
   document.getElementById('wq-title').textContent = wq.title;
-  document.getElementById('wq-meta').textContent = wq.subtitle;
+  document.getElementById('wq-meta').textContent = wq.subtitle + (currentStandards ? ' | ' + currentStandards : '');
   document.getElementById('wq-guiding-q').textContent = wq.guidingQuestion;
 
   document.getElementById('content-intro').innerHTML = `
@@ -930,12 +1023,15 @@ Generated by WebQuest Generator`;
 function resetForm() {
   currentWQ = null;
   selectedTopic = '';
+  currentStandards = '';
   document.getElementById('setup-section').style.display = 'block';
   document.getElementById('webquest-output').style.display = 'none';
   document.getElementById('topic-card').style.display = 'none';
   document.getElementById('options-card').style.display = 'none';
+  document.getElementById('standards-group').style.display = 'none';
   document.getElementById('grade-select').value = '';
   document.getElementById('subject-select').value = '';
+  document.getElementById('standards-select').innerHTML = '<option value="">Select standards framework...</option>';
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
